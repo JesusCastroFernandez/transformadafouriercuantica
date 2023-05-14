@@ -1,0 +1,35 @@
+from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, Aer, execute
+
+# Definir la función que se desea maximizar
+def f(x):
+    return x**2
+
+# Crear el circuito cuántico
+n = 3 # número de qubits
+qr = QuantumRegister(n, 'q') # registro cuántico de entrada
+cr = ClassicalRegister(n, 'c') # registro clásico de salida
+qc = QuantumCircuit(qr, cr)
+
+# Inicializar los qubits
+qc.h(qr)
+
+# Aplicar la función cuántica
+for i in range(n):
+    qc.barrier()
+    qc.h(qr[i])
+    qc.rz(f(2**i)*np.pi, qr[i])
+    qc.h(qr[i])
+    
+# Medir los qubits
+qc.barrier()
+qc.measure(qr, cr)
+
+# Ejecutar el circuito cuántico
+backend = Aer.get_backend('qasm_simulator')
+shots = 1024
+results = execute(qc, backend=backend, shots=shots).result()
+counts = results.get_counts()
+
+# Encontrar el resultado más probable
+most_common = sorted(counts.items(), key=lambda x: -x[1])[0]
+print("El resultado más probable es:", most_common[0])
